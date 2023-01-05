@@ -25,11 +25,11 @@ public class OrderService {
 	@Autowired
 	private RestTemplate rt;
 	
-	 @Value("${microservice.football-service.endpoints.endpoint.uri}")
+	/* @Value("${microservice.football-service.endpoints.endpoint.uri}")
 	    private String FOOTBALL_SERVICE_END_POINT;
 	 
 	 @Value("${microservice.PAYMENT-SERVICE.endpoints.endpoint.uri}")
-	    private String PAYMENT_SERVICE_END_POINT;
+	    private String PAYMENT_SERVICE_END_POINT;*/
 	
 	public OrderResponse placeOrder(OrderRequest orderRequest) {
 		OrderResponse response=new OrderResponse();
@@ -38,7 +38,7 @@ public class OrderService {
 
 		//check if the player exists calling the football players microservice end point
 		
-		HashMap<String,Object> resp=rt.getForObject(FOOTBALL_SERVICE_END_POINT+order.getPlayerName(), HashMap.class);
+		HashMap<String,Object> resp=rt.getForObject("http://GATEWAY-SERVICE/footballplayer/name/"+order.getPlayerName(), HashMap.class);
 		System.out.println("calling footballer service ====> response is ==> "+resp);
 		order.setPrice((Integer)resp.get("price"));
 		paymnet.setAmount((Integer)resp.get("price"));
@@ -49,7 +49,7 @@ public class OrderService {
 
 		paymnet.setOrderId(saved.getId());
 		//if exists do payment 
-		HashMap<String,Object> paymentResp=rt.postForObject(PAYMENT_SERVICE_END_POINT, paymnet, HashMap.class);
+		HashMap<String,Object> paymentResp=rt.postForObject("http://GATEWAY-SERVICE/api/payment  ", paymnet, HashMap.class);
 		System.out.println("payment response is ===> "+paymentResp);
 		if(paymentResp.get((String)"resultStatus").equals(RequestResult.PAYMENT_SUCCESS)){
 			saved.setResult(RequestResult.SUCCESS);
